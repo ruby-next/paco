@@ -32,6 +32,10 @@ To install this gem onto your local machine, run `bundle exec rake install`.
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/skryukov/paco.
 
+## Alternatives
+
+- [parsby] — gem with some cool error messages!
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License].
