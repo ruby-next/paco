@@ -4,7 +4,6 @@ require "paco/version"
 require "paco/parse_error"
 require "paco/context"
 require "paco/parser"
-require "paco/combinators"
 
 module Paco
   def self.extended(base)

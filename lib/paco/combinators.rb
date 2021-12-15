@@ -1,18 +1,15 @@
 # frozen_string_literal: true
 
-require "monitor"
-
 require "paco/combinators/char"
+require "paco/memoizer"
 
 module Paco
   module Combinators
     def self.extended(base)
-      base.extend MonitorMixin
       base.extend Char
     end
 
     def self.included(base)
-      base.include MonitorMixin
       base.include Char
     end
 
@@ -171,13 +168,7 @@ module Paco
 
     # Helper used for memoization
     def memoize(&block)
-      key = block.source_location
-      synchronize do
-        @_paco_memoized ||= {}
-        return @_paco_memoized[key] if @_paco_memoized.key?(key)
-
-        @_paco_memoized[key] = block.call
-      end
+      Memoizer.memoize(block.source_location, &block)
     end
   end
 end
