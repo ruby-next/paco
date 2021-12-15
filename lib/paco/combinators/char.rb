@@ -32,7 +32,7 @@ module Paco
       # @param [String] matcher
       # @return [Paco::Parser]
       def string(matcher)
-        Parser.new(matcher) do |ctx, parser|
+        Parser.new("string(#{matcher.inspect})") do |ctx, parser|
           src = ctx.read(matcher.length)
           parser.failure(ctx) if src != matcher
 
@@ -49,7 +49,7 @@ module Paco
       # @param [Integer] group
       def regexp(regexp, group: 0)
         anchored_regexp = Regexp.new("\\A(?:#{regexp.source})", regexp.options)
-        Parser.new(regexp.inspect) do |ctx, parser|
+        Parser.new("regexp(#{regexp.inspect})") do |ctx, parser|
           match = anchored_regexp.match(ctx.read_all)
           parser.failure(ctx) if match.nil?
 
@@ -62,7 +62,7 @@ module Paco
       # @param [Regexp] regexp
       # @return [Paco::Parser]
       def regexp_char(regexp)
-        satisfy(regexp.inspect) { |char| regexp.match?(char) }
+        satisfy("regexp_char(#{regexp.inspect})") { |char| regexp.match?(char) }
       end
 
       # Returns a parser that looks for exactly one character from passed
@@ -70,7 +70,7 @@ module Paco
       # @param [String, Array<String>] matcher
       # @return [Paco::Parser]
       def one_of(matcher)
-        satisfy(matcher.to_s) { |char| matcher.include?(char) }
+        satisfy("one_of(#{matcher})") { |char| matcher.include?(char) }
       end
 
       # Returns a parser that looks for exactly one character _NOT_ from passed
@@ -78,7 +78,7 @@ module Paco
       # @param [String, Array<String>] matcher
       # @return [Paco::Parser]
       def none_of(matcher)
-        satisfy("not #{matcher}") { |char| !matcher.include?(char) }
+        satisfy("none_of(#{matcher})") { |char| !matcher.include?(char) }
       end
 
       # Returns a parser that consumes and returns the next character of the input.
@@ -91,7 +91,7 @@ module Paco
       # @return [Paco::Parser]
       def remainder
         memoize do
-          Parser.new("remainder of the input") do |ctx, parser|
+          Parser.new("remainder") do |ctx, parser|
             result = ctx.read_all
             ctx.pos += result.length
             result

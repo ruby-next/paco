@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning].
 
 ## [Unreleased]
 
+### Added
+
+- Callstack collection for debugging. ([@skryukov])
+
+Pass `with_callstack: true` to the `Paco::Parser#parse` method to collect a callstack while parsing. To examine the callstack catch the `ParseError` exception:
+
+```ruby
+begin
+  string("Paco").parse("Paco!", with_callstack: true)
+rescue Paco::ParseError => e
+  pp e.callstack.stack # You will probably want to use `binding.irb` or `binding.pry`
+end
+```
+
+### Fixed
+
+- `Paco::Combinators::Char#regexp` now uses `\A` instead of `^`. ([@skryukov])
+- `include Paco` now works inside `irb`. ([@skryukov])
+
 ## [0.1.0]
 
 ### Added

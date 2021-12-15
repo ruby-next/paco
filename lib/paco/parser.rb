@@ -6,36 +6,47 @@ module Paco
   class Parser
     attr_reader :desc
 
+    # @param [String] desc
     def initialize(desc = "", &block)
       @desc = desc
       @block = block
     end
 
-    def parse(input)
-      ctx = input.is_a?(Context) ? input : Context.new(input)
+    # @param [String] desc
+    # @return [Paco::Parser]
+    def with_desc(desc)
+      @desc = desc
+      self
+    end
+
+    # @param [String, Paco::Context] input
+    # @param [true, false] with_callstack
+    def parse(input, with_callstack: false)
+      ctx = input.is_a?(Context) ? input : Context.new(input, with_callstack: with_callstack)
       skip(Paco::Combinators.eof)._parse(ctx)
     end
 
+    # @param [Paco::Context] ctx
     def _parse(ctx)
-      @block.call(ctx, self)
-      # TODO: add ability for debugging
-      # puts ""
-      # puts "#{@block.source_location} succeed."
-      # puts "#{ctx.input.length}/#{ctx.pos}: " + ctx.input[ctx.last_pos..ctx.pos].inspect
-      # puts ""
-      # res
+      ctx.start_parse(self)
+      res = @block.call(ctx, self)
+      ctx.success_parse(res, self)
+      res
     end
 
     # Raises ParseError
     # @param [Paco::Context] ctx
     # @raise [Paco::ParseError]
     def failure(ctx)
+      ctx.failure_parse(self)
       raise ParseError.new(ctx, desc), "", []
     end
 
     # Returns a new parser which tries `parser`, and if it fails uses `other`.
+    # @param [Paco::Parser] other
+    # @return [Paco::Parser]
     def or(other)
-      Parser.new do |ctx|
+      Parser.new("or(#{desc}, #{other.desc})") do |ctx|
         _parse(ctx)
       rescue ParseError
         other._parse(ctx)
@@ -47,7 +58,7 @@ module Paco
     # @param [Poco::Parser] other
     # @return [Paco::Parser]
     def skip(other)
-      Paco::Combinators.seq(self, other).fmap { |results| results[0] }
+      Paco::Combinators.seq(self, other).fmap { |results| results[0] }.with_desc("#{desc}.skip(#{other.desc})")
     end
     alias_method :<, :skip
 
@@ -55,14 +66,15 @@ module Paco
     # @param [Poco::Parser] other
     # @return [Paco::Parser]
     def next(other)
-      bind { other }
+      Paco::Combinators.seq(self, other).fmap { |results| results[1] }
+        .with_desc("#{desc}.next(#{other.desc})")
     end
     alias_method :>, :next
 
     # Transforms the output of `parser` with the given block.
     # @return [Paco::Parser]
     def fmap(&block)
-      Parser.new do |ctx|
+      Parser.new("#{desc}.fmap") do |ctx|
         block.call(_parse(ctx))
       end
     end
@@ -74,7 +86,7 @@ module Paco
     # with the other Paco::Combinators.
     # @return [Paco::Parser]
     def bind(&block)
-      Parser.new do |ctx|
+      Parser.new("#{desc}.bind") do |ctx|
         block.call(_parse(ctx))._parse(ctx)
       end
     end
@@ -139,7 +151,7 @@ module Paco
         raise ArgumentError, "invalid attributes: min `#{min}`, max `#{max}`"
       end
 
-      Parser.new do |ctx|
+      Parser.new("#{desc}.times(#{min}, #{max})") do |ctx|
         results = min.times.map { _parse(ctx) }
         (max - min).times.each do
           results << _parse(ctx)

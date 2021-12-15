@@ -36,7 +36,7 @@ module Paco
     # Returns a parser that doesn't consume any input and always returns `result`.
     # @return [Paco::Parser]
     def succeed(result)
-      Parser.new { result }
+      Parser.new("succeed(#{result})") { result }
     end
 
     # Returns a parser that doesn't consume any input and always fails with passed `message`.
@@ -51,7 +51,7 @@ module Paco
     # @param [Paco::Parser] parser
     # @return [Paco::Parser]
     def lookahead(parser)
-      Parser.new do |ctx|
+      Parser.new("lookahead(#{parser.desc})") do |ctx|
         start_pos = ctx.pos
         parser._parse(ctx)
         ctx.pos = start_pos
@@ -65,7 +65,7 @@ module Paco
     def alt(*parsers)
       raise ArgumentError, "no parsers specified" if parsers.empty?
 
-      Parser.new do |ctx|
+      Parser.new("alt(#{parsers.map(&:desc).join(", ")})") do |ctx|
         result = nil
         last_error = nil
         start_pos = ctx.pos
@@ -88,7 +88,7 @@ module Paco
     def seq(*parsers)
       raise ArgumentError, "no parsers specified" if parsers.empty?
 
-      Parser.new do |ctx|
+      Parser.new("seq(#{parsers.map(&:desc).join(", ")})") do |ctx|
         parsers.map { |parser| parser._parse(ctx) }
       end
     end
@@ -119,6 +119,7 @@ module Paco
     # @return [Paco::Parser]
     def sep_by(parser, separator)
       alt(sep_by_1(parser, separator), succeed([]))
+        .with_desc("sep_by(#{parser.desc}, #{separator.desc})")
     end
 
     # Returns a parser that expects one or more matches for `parser`,
@@ -127,9 +128,8 @@ module Paco
     # @param [Paco::Parser] separator
     # @return [Paco::Parser]
     def sep_by_1(parser, separator)
-      seq_map(parser, many(separator.next(parser))) do |first, arr|
-        [first] + arr
-      end
+      seq_map(parser, many(separator.next(parser))) { |first, arr| [first] + arr }
+        .with_desc("sep_by_1(#{parser.desc}, #{separator.desc})")
     end
 
     # Expects the parser `before` before `parser` and `after` after `parser. Returns the result of the parser.
@@ -145,13 +145,10 @@ module Paco
     # @param [Paco::Parser] parser
     # @return [Paco::Parser]
     def many(parser)
-      Parser.new do |ctx|
+      Parser.new("many(#{parser.desc})") do |ctx|
         results = []
-        # last_pos = ctx.pos
         loop do
           results << parser._parse(ctx)
-          # raise ArgumentError, "smth wrong" if last_pos == ctx.pos
-          # last_pos = ctx.pos
         rescue ParseError
           break
         end

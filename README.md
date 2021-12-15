@@ -63,7 +63,7 @@ end
 BranchNameParser.parse("feature/branch-validation")
 ```
 
-Easy? Not really, but there is a chance you can read it. ¯\_(ツ)_/¯
+Easy? Not really, but there is a chance you can read it. 😅
 
 See [API documentation](docs/paco.md), [examples](examples) and [specs](spec) for more info on usage.
 

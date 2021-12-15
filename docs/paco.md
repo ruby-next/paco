@@ -6,6 +6,7 @@
 - [Paco::Combinators: Main methods](#pacocombinators-main-methods)
 - [Paco::Combinators: Text related methods](#pacocombinators-text-related-methods)
 - [Paco::Parser methods](#pacoparser-methods)
+- [Debugging](#debugging)
 
 ## Usage
 
@@ -801,4 +802,25 @@ include Paco
 
 many(letter).join(" ").parse("Paco") #=> "P a c o"
 many(letter).join.parse("Paco") #=> "Paco"
+```
+
+## Debugging
+
+Pass `with_callstack: true` to the `Paco::Parser#parse` method to collect a callstack while parsing. To examine the callstack catch the `ParseError` exception:
+
+```ruby
+begin
+  string("Paco").parse("Paco!", with_callstack: true)
+rescue Paco::ParseError => e
+  pp e.callstack.stack # You will probably want to use `binding.irb` or `binding.pry`
+end
+#=>
+# [
+#   {:pos=>0, :status=>:start, :depth=>1, :parser=>"string(\"Paco\").skip(end of file)"},
+#   {:pos=>0, :status=>:start, :depth=>2, :parser=>"seq(string(\"Paco\"), end of file)"},
+#   {:pos=>0, :status=>:start, :depth=>3, :parser=>"string(\"Paco\")"},
+#   {:pos=>4, :status=>:success, :depth=>2, :result=>"Paco", :parser=>"string(\"Paco\")"},
+#   {:pos=>4, :status=>:start, :depth=>3, :parser=>"end of file"},
+#   {:pos=>4, :status=>:failure, :depth=>2, :parser=>"end of file"}
+# ]
 ```

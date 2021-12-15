@@ -8,20 +8,18 @@ module Paco
       @ctx = ctx
       @pos = ctx.pos
       @expected = expected
+    end
 
-      # TODO: make this possible to show every parsing message? or last n?
-      # puts ""
-      # puts "#{ctx.pos}/#{ctx.input.length}: #{ctx.input[ctx.last_pos..ctx.pos]}"
-      # puts "expected: #{expected}"
-      # puts ""
+    def callstack
+      @ctx.callstack
     end
 
     def message
       index = @ctx.index(@pos)
       <<~MSG
-        Parsing error
+        \nParsing error
         line #{index[:line]}, column #{index[:column]}:
-        unexpected #{@ctx.input[@pos] || "end of file"}
+        unexpected #{@ctx.eof? ? "end of file" : @ctx.input[@pos].inspect}
         expecting #{@expected}
       MSG
     end

@@ -1,17 +1,16 @@
 # frozen_string_literal: true
+
+require "paco/callstack"
+
 module Paco
   class Context
-    attr_reader :input, :last_pos, :pos
+    attr_reader :input, :last_pos, :callstack
+    attr_accessor :pos
 
-    def pos=(np)
-      # TODO: is that needed?
-      @last_pos = @pos
-      @pos = np
-    end
-
-    def initialize(input, pos = 0)
+    def initialize(input, pos: 0, with_callstack: false)
       @input = input
       @pos = pos
+      @callstack = Callstack.new if with_callstack
     end
 
     def read(n)
@@ -35,6 +34,22 @@ module Paco
         column: lines[-1]&.length || 0,
         pos: from
       }
+    end
+
+    # @param [Paco::Parser] parser
+    def failure_parse(parser)
+      @callstack&.failure(pos: pos, parser: parser.desc)
+    end
+
+    # @param [Paco::Parser] parser
+    def start_parse(parser)
+      @callstack&.start(pos: pos, parser: parser.desc)
+    end
+
+    # @param [Object] result
+    # @param [Paco::Parser] parser
+    def success_parse(result, parser)
+      @callstack&.success(pos: pos, result: result, parser: parser.desc)
     end
   end
 end
