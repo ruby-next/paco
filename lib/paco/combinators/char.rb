@@ -46,8 +46,9 @@ module Paco
       # When `group` is specified, it returns only the text in the specific regexp match group.
       # @param [Regexp] regexp
       # @return [Paco::Parser]
+      # @param [Integer] group
       def regexp(regexp, group: 0)
-        anchored_regexp = Regexp.new("^(?:#{regexp.source})", regexp.options)
+        anchored_regexp = Regexp.new("\\A(?:#{regexp.source})", regexp.options)
         Parser.new(regexp.inspect) do |ctx, parser|
           match = anchored_regexp.match(ctx.read_all)
           parser.failure(ctx) if match.nil?
@@ -147,7 +148,7 @@ module Paco
         memoize { alt(newline, eof) }
       end
 
-      # Alias for `Paco::Combinators.regexp(/[a-z]/i)`.
+      # Alias for `Paco::Combinators.regexp_char(/[a-z]/i)`.
       # @return [Paco::Parser]
       def letter
         memoize { regexp_char(/[a-z]/i) }
@@ -156,16 +157,16 @@ module Paco
       # Alias for `Paco::Combinators.regexp(/[a-z]+/i)`.
       # @return [Paco::Parser]
       def letters
-        memoize { seq(letter, letter.many).fmap { |x| x.flatten.join } }
+        memoize { regexp(/[a-z]+/i) }
       end
 
       # Alias for `Paco::Combinators.regexp(/[a-z]*/i)`.
       # @return [Paco::Parser]
       def opt_letters
-        memoize { letters | succeed("") }
+        memoize { regexp(/[a-z]*/i) }
       end
 
-      # Alias for `Paco::Combinators.regexp(/[0-9]/)`.
+      # Alias for `Paco::Combinators.regexp_char(/[0-9]/)`.
       # @return [Paco::Parser]
       def digit
         memoize { regexp_char(/[0-9]/) }
@@ -174,13 +175,13 @@ module Paco
       # Alias for `Paco::Combinators.regexp(/[0-9]+/)`.
       # @return [Paco::Parser]
       def digits
-        memoize { seq(digit, digit.many).fmap { |x| x.flatten.join } }
+        memoize { regexp(/[0-9]+/) }
       end
 
       # Alias for `Paco::Combinators.regexp(/[0-9]*/)`.
       # @return [Paco::Parser]
       def opt_digits
-        memoize { digits | succeed("") }
+        memoize { regexp(/[0-9]*/) }
       end
 
       # Alias for `Paco::Combinators.regexp(/\s+/)`.
