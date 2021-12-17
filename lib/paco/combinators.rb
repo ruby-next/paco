@@ -5,15 +5,10 @@ require "paco/memoizer"
 
 module Paco
   module Combinators
-    def self.extended(base)
-      base.extend Char
-    end
+    include Char
+    extend Char
 
-    def self.included(base)
-      base.include Char
-    end
-
-    extend self
+    module_function
 
     # Returns a parser that runs the passed `parser` without consuming the input, and
     # returns `null` if the passed `parser` _does not match_ the input. Fails otherwise.
