@@ -4,6 +4,7 @@ require "paco"
 
 module JsonParser
   extend Paco
+  prepend MemoWise
 
   module_function
 
@@ -12,32 +13,34 @@ module JsonParser
   end
 
   def value
-    memoize { alt(null, bool, number, str, array, object) }
+    alt(null, bool, number, str, array, object)
   end
+  memo_wise :value
 
   def null
-    memoize { string("null").result(nil) }
+    string("null").result(nil)
   end
+  memo_wise :null
 
   def bool
-    memoize do
       alt(
         string("true").result(true),
         string("false").result(false)
       )
-    end
   end
+  memo_wise :bool
 
   def sign
-    memoize { alt(string("-"), string("+")) }
+    alt(string("-"), string("+"))
   end
+  memo_wise :sign
 
   def decimal
-    memoize { digits.fmap(&:to_i) }
+    digits.fmap(&:to_i)
   end
+  memo_wise :decimal
 
   def number
-    memoize do
       seq(
         optional(sign),
         decimal,
@@ -60,46 +63,44 @@ module JsonParser
           n *= 10**e
         end
         n
-      end
     end
   end
+  memo_wise :number
 
   def str
-    memoize do
-      wrap(
-        string('"'),
-        string('"'),
-        many(alt(none_of('"\\'), escaped_chars)).join
-      )
-    end
+    wrap(
+      string('"'),
+      string('"'),
+      many(alt(none_of('"\\'), escaped_chars)).join
+    )
   end
+  memo_wise :str
 
   def array
-    memoize do
-      wrap(
-        string("["),
-        opt_ws > string("]"),
-        sep_by(spaced(lazy { value }), string(","))
-      )
-    end
+    wrap(
+      string("["),
+      opt_ws > string("]"),
+      sep_by(spaced(lazy { value }), string(","))
+    )
   end
+  memo_wise :array
 
   def object
-    memoize do
-      wrap(string("{"), opt_ws > string("}"),
-        sep_by(
-          spaced(seq(
-            str < spaced(string(":")),
-            lazy { value }
-          )),
-          string(",")
-        )).fmap { |x| x.to_h }
-    end
+    wrap(string("{"), opt_ws > string("}"),
+      sep_by(
+        spaced(seq(
+          str < spaced(string(":")),
+          lazy { value }
+        )),
+        string(",")
+      )).fmap { |x| x.to_h }
   end
+  memo_wise :object
 
   def four_hex_digits
-    memoize { regexp(/\h{4}/) }
+    regexp(/\h{4}/)
   end
+  memo_wise :four_hex_digits
 
   def escaped_chars
     string("\\").next(

@@ -25,4 +25,6 @@ Gem::Specification.new do |spec|
   spec.files = Dir.glob("lib/**/*") + %w[README.md LICENSE.txt CHANGELOG.md]
 
   spec.require_paths = ["lib"]
+
+  spec.add_runtime_dependency "memo_wise", "< 1.4"
 end
