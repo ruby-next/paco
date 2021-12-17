@@ -166,7 +166,7 @@ module Paco
     # Returns a parser that runs `parser` at least `num` times,
     # and returns an array of the results.
     def at_least(num)
-      Paco::Combinators.seq_map(times(num), many) do |head, rest|
+      Paco::Combinators.seq(times(num), many) do |head, rest|
         head + rest
       end
     end

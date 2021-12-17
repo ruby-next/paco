@@ -131,9 +131,11 @@ example.parse("false") #=> "false"
 example.parse("null") #=> Paco::ParseError
 ```
 
-### Paco::Combinators.seq(*parsers)
+### Paco::Combinators.seq(*parsers, &block)
 
 Accepts one or more parsers, and returns a parser that expects them to match in order, returns an array of all their results.
+
+If `block` specified, passes results of the `parses` as an arguments to a `block`, and at the end returns its result.
 
 ```ruby
 include Paco
@@ -142,14 +144,6 @@ example = seq(string("pa"), string("co"))
 
 example.parse("paco") #=> ["pa", "co"]
 example.parse("Paco") #=> Paco::ParseError
-```
-
-### Paco::Combinators.seq_map(*parsers, &block)
-
-Returns a parser that matches all `parsers` sequentially, and passes their results as an arguments to a `block`, and at the end returns its result.
-
-```ruby
-include Paco
 
 example = seq_map(string("pa"), string("co")) { |x, y| y + x }
 

@@ -83,26 +83,19 @@ module Paco
 
     # Accepts one or more parsers, and returns a parser that expects them
     # to match in order, returns an array of all their results.
+    # If `block` specified, passes results of the `parses` as an arguments
+    # to a `block`, and at the end returns its result.
     # @param [Array<Paco::Parser>] parsers
     # @return [Paco::Parser]
     def seq(*parsers)
       raise ArgumentError, "no parsers specified" if parsers.empty?
 
-      Parser.new("seq(#{parsers.map(&:desc).join(", ")})") do |ctx|
+      result = Parser.new("seq(#{parsers.map(&:desc).join(", ")})") do |ctx|
         parsers.map { |parser| parser._parse(ctx) }
       end
-    end
+      return result unless block_given?
 
-    # Returns a parser that matches all `parsers` sequentially, and passes
-    # their results as an arguments to a `block`, and at the end returns its result.
-    # @param [Array<Paco::Parser>] parsers
-    # @return [Paco::Parser]
-    def seq_map(*parsers, &block)
-      raise ArgumentError, "no parsers specified" if parsers.empty?
-
-      seq(*parsers).fmap do |results|
-        block.call(*results)
-      end
+      result.fmap { |results| yield(*results) }
     end
 
     # Accepts a block that returns a parser, which is evaluated the first time the parser is used.
@@ -128,7 +121,7 @@ module Paco
     # @param [Paco::Parser] separator
     # @return [Paco::Parser]
     def sep_by!(parser, separator)
-      seq_map(parser, many(separator.next(parser))) { |first, arr| [first] + arr }
+      seq(parser, many(separator.next(parser))) { |first, arr| [first] + arr }
         .with_desc("sep_by!(#{parser.desc}, #{separator.desc})")
     end
     alias_method :sep_by_1, :sep_by!

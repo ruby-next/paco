@@ -78,6 +78,20 @@ RSpec.describe Paco::Combinators, :include_combinators do
     it "raises an error when no parsers passed" do
       expect { seq.parse("Paco") }.to raise_error(ArgumentError)
     end
+
+    context "with block passed" do
+      let(:example) do
+        seq(string("pa"), string("co")) { |x, y| y + x }.skip(remainder)
+      end
+
+      it "returns result of the block" do
+        expect(example.parse("paco!")).to eq("copa")
+      end
+
+      it "raises an error when parser fails" do
+        expect { example.parse("Paco") }.to raise_error(Paco::ParseError)
+      end
+    end
   end
 
   describe "#many" do
@@ -101,24 +115,6 @@ RSpec.describe Paco::Combinators, :include_combinators do
 
     it "returns nil when parser fails" do
       expect(example.parse("paco")).to be_nil
-    end
-  end
-
-  describe "#seq_map" do
-    let(:example) do
-      seq_map(string("pa"), string("co")) { |x, y| y + x }.skip(remainder)
-    end
-
-    it "returns result of the block" do
-      expect(example.parse("paco!")).to eq("copa")
-    end
-
-    it "raises an error when parser fails" do
-      expect { example.parse("Paco") }.to raise_error(Paco::ParseError)
-    end
-
-    it "raises an error when no parsers passed" do
-      expect { seq_map { |x| x }.parse("Paco") }.to raise_error(ArgumentError)
     end
   end
 
