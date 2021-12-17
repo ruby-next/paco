@@ -17,14 +17,16 @@ module Paco
     def not_followed_by(parser)
       Parser.new("not #{parser.desc}") do |ctx, pars|
         start_pos = ctx.pos
-        begin
+
+        res = catch :paco_parse_error do
           parser._parse(ctx)
-        rescue ParseError
-          ctx.pos = start_pos
-          nil
-        else
-          pars.failure(ctx)
+          :succeed
         end
+
+        pars.failure(ctx) unless res.nil?
+
+        ctx.pos = start_pos
+        nil
       end
     end
 
@@ -61,18 +63,17 @@ module Paco
       raise ArgumentError, "no parsers specified" if parsers.empty?
 
       Parser.new("alt(#{parsers.map(&:desc).join(", ")})") do |ctx|
-        result = nil
-        last_error = nil
-        start_pos = ctx.pos
-        parsers.each do |pars|
-          break result = {value: pars._parse(ctx)}
-        rescue ParseError => e
-          last_error = e
-          ctx.pos = start_pos
-          next
+        catch :paco_parse_success do
+          start_pos = ctx.pos
+          parsers.each do |pars|
+            catch :paco_parse_error do
+              result = pars._parse(ctx)
+              throw :paco_parse_success, result
+            end
+            ctx.pos = start_pos
+          end
+          throw :paco_parse_error
         end
-        raise last_error unless result
-        result[:value]
       end
     end
 
@@ -119,6 +120,7 @@ module Paco
       seq(parser, many(separator.next(parser))) { |first, arr| [first] + arr }
         .with_desc("sep_by!(#{parser.desc}, #{separator.desc})")
     end
+
     alias_method :sep_by_1, :sep_by!
 
     # Expects the parser `before` before `parser` and `after` after `parser. Returns the result of the parser.
@@ -136,10 +138,10 @@ module Paco
     def many(parser)
       Parser.new("many(#{parser.desc})") do |ctx|
         results = []
-        loop do
-          results << parser._parse(ctx)
-        rescue ParseError
-          break
+        catch :paco_parse_error do
+          loop do
+            results << parser._parse(ctx)
+          end
         end
         results
       end

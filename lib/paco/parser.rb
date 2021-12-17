@@ -23,7 +23,10 @@ module Paco
     # @param [true, false] with_callstack
     def parse(input, with_callstack: false)
       ctx = input.is_a?(Context) ? input : Context.new(input, with_callstack: with_callstack)
-      skip(Paco::Combinators.eof)._parse(ctx)
+      catch :paco_parse_error do
+        return skip(Paco::Combinators.eof)._parse(ctx)
+      end
+      raise ParseError.new(ctx, desc), "", []
     end
 
     # @param [Paco::Context] ctx
@@ -39,7 +42,8 @@ module Paco
     # @raise [Paco::ParseError]
     def failure(ctx)
       ctx.failure_parse(self)
-      raise ParseError.new(ctx, desc), "", []
+      # raise ParseError.new(ctx, desc), "", []
+      throw :paco_parse_error
     end
 
     # Returns a new parser which tries `parser`, and if it fails uses `other`.
@@ -47,8 +51,10 @@ module Paco
     # @return [Paco::Parser]
     def or(other)
       Parser.new("or(#{desc}, #{other.desc})") do |ctx|
-        _parse(ctx)
-      rescue ParseError
+        res = catch :paco_parse_error do
+          {value: _parse(ctx)}
+        end
+        next res[:value] unless res.nil?
         other._parse(ctx)
       end
     end
@@ -153,10 +159,11 @@ module Paco
 
       Parser.new("#{desc}.times(#{min}, #{max})") do |ctx|
         results = min.times.map { _parse(ctx) }
-        (max - min).times.each do
-          results << _parse(ctx)
-        rescue ParseError
-          break
+
+        catch :paco_parse_error do
+          (max - min).times.each do
+            results << _parse(ctx)
+          end
         end
 
         results
