@@ -118,7 +118,7 @@ module Paco
     # @param [Paco::Parser] separator
     # @return [Paco::Parser]
     def sep_by(parser, separator)
-      alt(sep_by_1(parser, separator), succeed([]))
+      alt(sep_by!(parser, separator), succeed([]))
         .with_desc("sep_by(#{parser.desc}, #{separator.desc})")
     end
 
@@ -127,10 +127,11 @@ module Paco
     # @param [Paco::Parser] parser
     # @param [Paco::Parser] separator
     # @return [Paco::Parser]
-    def sep_by_1(parser, separator)
+    def sep_by!(parser, separator)
       seq_map(parser, many(separator.next(parser))) { |first, arr| [first] + arr }
-        .with_desc("sep_by_1(#{parser.desc}, #{separator.desc})")
+        .with_desc("sep_by!(#{parser.desc}, #{separator.desc})")
     end
+    alias_method :sep_by_1, :sep_by!
 
     # Expects the parser `before` before `parser` and `after` after `parser. Returns the result of the parser.
     # @param [Paco::Parser] before

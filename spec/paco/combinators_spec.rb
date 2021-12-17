@@ -142,8 +142,8 @@ RSpec.describe Paco::Combinators, :include_combinators do
     end
   end
 
-  describe "#sep_by_1" do
-    let(:example) { sep_by_1(digits, string(",")) }
+  describe "#sep_by!" do
+    let(:example) { sep_by!(digits, string(",")) }
 
     it "returns array of parsed results" do
       expect(example.parse("1,2,3")).to eq(%w[1 2 3])

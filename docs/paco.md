@@ -186,14 +186,14 @@ example.parse("") #=> []
 example.parse("Paco") #=> Paco::ParseError
 ```
 
-### Paco::Combinators.sep_by_1(parser, separator)
+### Paco::Combinators.sep_by!(parser, separator)
 
 Returns a parser that expects **one or more** matches for `parser`, separated by the parser `separator`. Returns an array of `parser` results.
 
 ```ruby
 include Paco
 
-example = sep_by_1(digits, string(","))
+example = sep_by!(digits, string(","))
 
 example.parse("1,1,2,3,5,8,13,21") #=> ["1", "1", "2", "3", "5", "8", "13", "21"]
 example.parse("1") #=> ["1"]
