@@ -153,6 +153,13 @@ module Paco
       alt(parser, succeed(nil))
     end
 
+    # Returns parser that returns `Paco::Index` representing
+    # the current offset into the parse without consuming the input.
+    # @return [Paco::Parser]
+    def index
+      Parser.new { |ctx| ctx.index }
+    end
+
     # Helper used for memoization
     def memoize(&block)
       Memoizer.memoize(block.source_location, &block)

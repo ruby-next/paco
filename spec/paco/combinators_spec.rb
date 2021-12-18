@@ -187,4 +187,10 @@ RSpec.describe Paco::Combinators, :include_combinators do
       expect { example.parse("Paco") }.to raise_error(Paco::ParseError)
     end
   end
+
+  describe "#index" do
+    it "returns index" do
+      expect(index.parse("")).to eq(Paco::Index.new(0, 1, 1))
+    end
+  end
 end

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "paco/callstack"
+require "paco/index"
 
 module Paco
   class Context
@@ -25,15 +26,10 @@ module Paco
       pos >= input.length
     end
 
+    # @param [Integer] from
+    # @return [Paco::Index]
     def index(from = nil)
-      from ||= pos
-      lines = input[0..from].lines
-
-      {
-        line: lines.length,
-        column: lines[-1]&.length || 0,
-        pos: from
-      }
+      Index.calculate(input: input, pos: from || pos)
     end
 
     # @param [Paco::Parser] parser

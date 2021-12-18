@@ -20,7 +20,7 @@ module Paco
       index = ctx.index(pos)
       <<~MSG
         \nParsing error
-        line #{index[:line]}, column #{index[:column]}:
+        line #{index.line}, column #{index.column}:
         unexpected #{ctx.eof? ? "end of file" : ctx.input[pos].inspect}
         expecting #{expected}
       MSG

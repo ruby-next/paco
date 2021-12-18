@@ -21,6 +21,16 @@ rescue Paco::ParseError => e
 end
 ```
 
+- `Paco::Combinators.index` method. ([@skryukov])
+
+Call `Paco::Combinators.index` to get `Paco::Index` representing the current offset into the parse without consuming the input.
+`Paco::Index` has a 0-based character offset attribute `:pos` and 1-based `:line` and `:column` attributes.
+
+```ruby
+index.parse("Paco") #=> #<struct Paco::Index pos=0, line=1, column=1> 
+```
+
+
 ### Changed
 
 - `Paco::Combinators.seq_map` merged into `Paco::Combinators.seq`. ([@skryukov])

@@ -234,6 +234,19 @@ example = lazy { failed("always fails") }
 example.parse("Paco") #=> Paco::ParseError
 ```
 
+### Paco::Combinators.index
+
+Returns parser that returns `Paco::Index` representing the current offset into the parse without consuming the input.
+`Paco::Index` has a 0-based character offset attribute `:pos` and 1-based `:line` and `:column` attributes.
+
+```ruby
+include Paco
+
+example = seq(one_of("123\n ").many.join, index, remainder)
+
+example.parse("1\n2\n3\n\n Paco") #=> ["1\n2\n3\n\n ", #<struct Paco::Index pos=8, line=5, column=2>, "Paco"] 
+```
+
 ## Paco::Combinators: Text related methods
 
 ### Paco::Combinators.string(matcher)
