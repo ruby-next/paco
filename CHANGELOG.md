@@ -25,6 +25,7 @@ end
 
 - `Paco::Combinators::Char#regexp` now uses `\A` instead of `^`. ([@skryukov])
 - `include Paco` now works inside `irb`. ([@skryukov])
+- `Paco::Combinators#not_followed_by` now doesn't consume input on error. ([@skryukov])
 
 ## [0.1.0]
 

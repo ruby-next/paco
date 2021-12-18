@@ -20,10 +20,11 @@ module Paco
         begin
           parser._parse(ctx)
         rescue ParseError
-          ctx.pos = start_pos
           nil
         else
           pars.failure(ctx)
+        ensure
+          ctx.pos = start_pos
         end
       end
     end

@@ -9,8 +9,10 @@ RSpec.describe Paco::Combinators, :include_combinators do
       expect(parser.parse("b")).to eq([nil, "b"])
     end
 
-    it "raises an error" do
-      expect { not_followed_by(string("a")).parse("a") }.to raise_error(Paco::ParseError)
+    it "raises an error without consuming input" do
+      expect { not_followed_by(string("a")).parse("a") }.to raise_error(Paco::ParseError) do |err|
+        expect(err.ctx.pos).to eq(0)
+      end
     end
   end
 
