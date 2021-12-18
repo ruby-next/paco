@@ -21,6 +21,11 @@ rescue Paco::ParseError => e
 end
 ```
 
+### Changed
+
+- `Paco::Combinators.seq_map` merged into `Paco::Combinators.seq`. ([@skryukov])
+- `Paco::Combinators.sep_by_1` renamed to `Paco::Combinators.sep_by!`. ([@skryukov])
+
 ### Fixed
 
 - `Paco::Combinators::Char#regexp` now uses `\A` instead of `^`. ([@skryukov])
