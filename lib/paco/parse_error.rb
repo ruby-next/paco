@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Paco
   class Error < StandardError; end
 

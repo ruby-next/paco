@@ -19,7 +19,7 @@ module Paco
     end
 
     def read_all
-      input[pos..-1]
+      input[pos..]
     end
 
     def eof?
