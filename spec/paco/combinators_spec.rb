@@ -74,7 +74,9 @@ RSpec.describe Paco::Combinators, :include_combinators do
     end
 
     it "raises an error" do
-      expect { example.parse("Paco") }.to raise_error(Paco::ParseError)
+      expect { example.parse("paCo") }.to raise_error(Paco::ParseError) do |err|
+        expect(err.ctx.pos).to eq(0)
+      end
     end
 
     it "raises an error when no parsers passed" do
@@ -127,10 +129,6 @@ RSpec.describe Paco::Combinators, :include_combinators do
       expect(example.parse("1,2,3")).to eq(%w[1 2 3])
     end
 
-    it "returns array of parsed results with trailing separator" do
-      expect(example.parse("1,2,3,")).to eq(%w[1 2 3])
-    end
-
     it "returns empty array when nothing to parse" do
       expect(example.skip(remainder).parse("paco")).to eq([])
     end
@@ -145,10 +143,6 @@ RSpec.describe Paco::Combinators, :include_combinators do
 
     it "returns array of parsed results" do
       expect(example.parse("1,2,3")).to eq(%w[1 2 3])
-    end
-
-    it "returns array of parsed results with trailing separator" do
-      expect(example.parse("1,2,3,")).to eq(%w[1 2 3])
     end
 
     it "raises an error when nothing to parse" do

@@ -87,7 +87,13 @@ module Paco
       raise ArgumentError, "no parsers specified" if parsers.empty?
 
       result = Parser.new("seq(#{parsers.map(&:desc).join(", ")})") do |ctx|
-        parsers.map { |parser| parser._parse(ctx) }
+        start_pos = ctx.pos
+        begin
+          parsers.map { |parser| parser._parse(ctx) }
+        rescue ParseError => e
+          ctx.pos = start_pos
+          raise e
+        end
       end
       return result unless block_given?
 
