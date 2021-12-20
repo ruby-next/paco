@@ -91,7 +91,8 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/skryuk
 
 ## Alternatives
 
-- [parsby] — gem with some cool error messages!
+- [parslet] - A small (but featureful) PEG based parser library.
+- [parsby] — Parser combinator library for Ruby inspired by Haskell's Parsec.
 
 ## License
 
@@ -100,5 +101,6 @@ The gem is available as open source under the terms of the [MIT License].
 [MIT License]: https://opensource.org/licenses/MIT
 [Parsec]: https://github.com/haskell/parsec
 [Parsimmon]: https://github.com/jneen/parsimmon
+[parslet]: https://github.com/kschiess/parslet
 [parsby]: https://github.com/jolmg/parsby
 [git branch names]: https://git-scm.com/docs/git-check-ref-format#_description
