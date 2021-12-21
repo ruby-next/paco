@@ -4,10 +4,9 @@ require "spec_helper"
 
 RSpec.describe Paco::Combinators, :include_combinators do
   describe "#not_followed_by" do
-    it "returns nil" do
-      parser = seq(not_followed_by(string("a")), string("b"))
-      expect(parser.parse("b")).to eq([nil, "b"])
-    end
+    subject { seq(not_followed_by(string("a")), string("b")) }
+
+    it { is_expected.to parse("b").as([nil, "b"]) }
 
     it "raises an error without consuming input" do
       expect { not_followed_by(string("a")).parse("a") }.to raise_error(Paco::ParseError) do |err|
@@ -17,64 +16,54 @@ RSpec.describe Paco::Combinators, :include_combinators do
   end
 
   describe "#lookahead" do
-    it "returns empty string" do
-      parser = seq(lookahead(string("42")), digits)
-      expect(parser.parse("42")).to eq(["", "42"])
-    end
+    subject { seq(lookahead(string("42")), digits) }
+
+    it { is_expected.to parse("42").as(["", "42"]) }
 
     it "raises an error" do
-      expect { lookahead(string("Alf")).parse("Paco") }.to raise_error(Paco::ParseError)
+      expect { lookahead(string("Alf")).parse("Paco") }.to raise_error(Paco::ParseError) do |err|
+        expect(err.ctx.pos).to eq(0)
+      end
     end
   end
 
   describe "#succeed" do
-    it "returns passed value" do
-      parser = seq(succeed("Paco"), remainder)
-      expect(parser.parse("<3")).to eq(%w[Paco <3])
-    end
+    subject { seq(succeed("Paco"), remainder) }
+
+    it { is_expected.to parse("<3").as(%w[Paco <3]) }
   end
 
   describe "#failed" do
-    it "raises an error" do
-      parser = seq(failed("message"), remainder)
-      expect { parser.parse("Paco") }.to raise_error(Paco::ParseError)
-    end
+    subject { seq(failed("message"), remainder) }
+
+    it { is_expected.not_to parse("Paco") }
   end
 
   describe "#alt" do
-    let(:alt_true_or_false) { alt(string("true"), string("false")) }
-    let(:alt_t_or_true) { alt(string("t").skip(remainder), string("true")) }
+    subject { alt(string("true"), string("false")) }
 
-    it "returns passed parser result" do
-      expect(alt_true_or_false.parse("true")).to eq("true")
-    end
-
-    it "returns passed parser result" do
-      expect(alt_true_or_false.parse("false")).to eq("false")
-    end
-
-    it "returns first passed parser result" do
-      expect(alt_t_or_true.parse("true")).to eq("t")
-    end
-
-    it "raises an error" do
-      expect { alt_true_or_false.parse("null") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.to parse("true").fully }
+    it { is_expected.to parse("false").fully }
+    it { is_expected.not_to parse("null") }
 
     it "raises an error when no parsers passed" do
       expect { alt.parse("Paco") }.to raise_error(ArgumentError)
     end
+
+    context "when first parser is less specific" do
+      subject { alt(string("t").skip(remainder), string("true")) }
+
+      it { is_expected.to parse("true").as("t") }
+    end
   end
 
   describe "#seq" do
-    let(:example) { seq(string("pa"), string("co")) }
+    subject { seq(string("pa"), string("co")) }
 
-    it "returns array of parsers results" do
-      expect(example.parse("paco")).to eq(%w[pa co])
-    end
+    it { is_expected.to parse("paco").as(%w[pa co]) }
 
     it "raises an error" do
-      expect { example.parse("paCo") }.to raise_error(Paco::ParseError) do |err|
+      expect { subject.parse("paCo") }.to raise_error(Paco::ParseError) do |err|
         expect(err.ctx.pos).to eq(0)
       end
     end
@@ -84,107 +73,71 @@ RSpec.describe Paco::Combinators, :include_combinators do
     end
 
     context "with block passed" do
-      let(:example) do
-        seq(string("pa"), string("co")) { |x, y| y + x }.skip(remainder)
-      end
-
-      it "returns result of the block" do
-        expect(example.parse("paco!")).to eq("copa")
-      end
-
-      it "raises an error when parser fails" do
-        expect { example.parse("Paco") }.to raise_error(Paco::ParseError)
-      end
+      subject { seq(string("pa"), string("co")) { |x, y| y + x }.skip(remainder) }
+      it { is_expected.to parse("paco!").as("copa") }
+      it { is_expected.not_to parse("Paco") }
     end
   end
 
   describe "#many" do
-    let(:example) { many(digit).skip(remainder) }
+    subject { many(digit).skip(remainder) }
 
-    it "returns parsed result" do
-      expect(example.parse("123")).to eq(%w[1 2 3])
-    end
-
-    it "returns empty array when parser fails" do
-      expect(example.parse("Paco")).to eq([])
-    end
+    it { is_expected.to parse("123").as(%w[1 2 3]) }
+    it { is_expected.to parse("Paco").as([]) }
   end
 
   describe "#optional" do
-    let(:example) { optional(string("Paco")).skip(remainder) }
+    subject { optional(string("Paco")).skip(remainder) }
 
-    it "returns parsed result" do
-      expect(example.parse("Paco!")).to eq("Paco")
-    end
-
-    it "returns nil when parser fails" do
-      expect(example.parse("paco")).to be_nil
-    end
+    it { is_expected.to parse("Paco!").as("Paco") }
+    it { is_expected.to parse("paco").as(nil) }
   end
 
   describe "#sep_by" do
-    let(:example) { sep_by(digits, string(",")) }
+    subject { sep_by(digits, string(",")) }
 
-    it "returns array of parsed results" do
-      expect(example.parse("1,2,3")).to eq(%w[1 2 3])
-    end
+    it { is_expected.to parse("1,2,3").as(%w[1 2 3]) }
+    it { is_expected.not_to parse(",2,3") }
 
     it "returns empty array when nothing to parse" do
-      expect(example.skip(remainder).parse("paco")).to eq([])
-    end
-
-    it "raises an error when parser fails" do
-      expect { example.parse(",2,3") }.to raise_error(Paco::ParseError)
+      expect(subject.skip(remainder)).to parse("paco").as([])
     end
   end
 
   describe "#sep_by!" do
-    let(:example) { sep_by!(digits, string(",")) }
+    subject { sep_by!(digits, string(",")) }
 
-    it "returns array of parsed results" do
-      expect(example.parse("1,2,3")).to eq(%w[1 2 3])
-    end
+    it { is_expected.to parse("1,2,3").as(%w[1 2 3]) }
+    it { is_expected.not_to parse(",2,3") }
 
     it "raises an error when nothing to parse" do
-      expect { example.skip(remainder).parse("paco") }.to raise_error(Paco::ParseError)
-    end
-
-    it "raises an error when parser fails" do
-      expect { example.parse(",2,3") }.to raise_error(Paco::ParseError)
+      expect(subject.skip(remainder)).not_to parse("paco")
     end
   end
 
   describe "#wrap" do
-    let(:example) { wrap(string("{"), string("}"), letters) }
+    subject { wrap(string("{"), string("}"), letters) }
 
-    it "returns parser result" do
-      expect(example.parse("{Paco}")).to eq("Paco")
-    end
-
-    it "raises an error when wrapped parser fails" do
-      expect { example.parse("{Пако}") }.to raise_error(Paco::ParseError)
-    end
-
-    it "raises an error when wrapping parser fails" do
-      expect { example.parse("{Paco") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.to parse("{Paco}").as("Paco") }
+    it { is_expected.not_to parse("{Пако}") }
+    it { is_expected.not_to parse("{Paco") }
   end
 
   describe "#lazy" do
-    let(:example) { lazy { failed("message") } }
+    subject { lazy { failed("message") } }
 
     it "doesn't call the block on reference" do
-      expect { example }.not_to raise_error
+      expect { subject }.not_to raise_error
     end
 
     it "calls the block on parsing" do
-      expect { example.parse("Paco") }.to raise_error(Paco::ParseError)
+      expect(subject).not_to parse("Paco")
     end
   end
 
   describe "#index" do
     it "returns index" do
-      expect(index.parse("")).to eq(Paco::Index.new(0, 1, 1))
+      expect(index).to parse("").as(Paco::Index.new(0, 1, 1))
     end
   end
 end

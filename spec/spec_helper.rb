@@ -8,6 +8,7 @@ SimpleCov.start do
 end
 
 require "paco"
+require "paco/rspec"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

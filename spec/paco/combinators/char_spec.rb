@@ -4,295 +4,234 @@ require "spec_helper"
 
 RSpec.describe Paco::Combinators::Char, :include_combinators do
   describe "#string" do
-    it "matches a string" do
-      expect(string("Paco").parse("Paco")).to eq "Paco"
-    end
+    subject { string("Paco") }
 
-    it "raises an error" do
-      expect { string("Paco").parse("paco") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.to parse("Paco").fully }
+    it { is_expected.not_to parse("paco") }
   end
 
   describe "#satisfy" do
-    let(:example) { satisfy { |ch| ch == ch.downcase }.skip(remainder) }
+    subject { satisfy { |ch| ch == ch.downcase }.skip(remainder) }
 
-    it "matches characters from string and returns an array" do
-      expect(example.parse("paco")).to eq "p"
-    end
-
-    it "raises an error" do
-      expect { example.parse("Paco") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.to parse("paco").as("p") }
+    it { is_expected.not_to parse("Paco") }
   end
 
   describe "#take_while" do
-    let(:example) { take_while { |ch| ch == ch.downcase }.skip(remainder) }
+    subject { take_while { |ch| ch == ch.downcase }.skip(remainder) }
 
-    it "matches characters from string and returns an array" do
-      expect(example.parse("come here, Paco")).to eq "come here, "
-    end
-
-    it "returns empty string if no matches found" do
-      expect(example.parse("Paco")).to eq ""
-    end
+    it { is_expected.to parse("come here, Paco").as("come here, ") }
+    it { is_expected.to parse("Paco").as("") }
   end
 
   describe "#one_of" do
-    it "matches a character from string" do
-      expect(one_of("abc").parse("b")).to eq "b"
-    end
+    subject { one_of("abc") }
 
-    it "matches a character from array" do
-      expect(one_of(%w[a b c]).parse("c")).to eq "c"
-    end
+    it { is_expected.to parse("b").fully }
+    it { is_expected.not_to parse("d") }
 
-    it "raises an error" do
-      expect { one_of("abc").parse("d") }.to raise_error(Paco::ParseError)
+    context "when passed array" do
+      subject { one_of(%w[a b c]) }
+
+      it { is_expected.to parse("b").fully }
+      it { is_expected.not_to parse("d") }
     end
   end
 
   describe "#none_of" do
-    it "matches a character not from string" do
-      expect(none_of("abc").parse("p")).to eq "p"
-    end
+    subject { none_of("abc") }
 
-    it "matches a character not from array" do
-      expect(none_of(%w[a b c]).parse("A")).to eq "A"
-    end
+    it { is_expected.to parse("p").fully }
+    it { is_expected.not_to parse("a") }
 
-    it "raises an error" do
-      expect { none_of("a b c").parse("b") }.to raise_error(Paco::ParseError)
+    context "when passed array" do
+      subject { none_of(%w[a b c]) }
+
+      it { is_expected.to parse("A").fully }
+      it { is_expected.not_to parse("b") }
     end
   end
 
   describe "#regexp" do
-    it "returns matched part of the string" do
-      expect(regexp(/\w{4}/).parse("Paco")).to eq("Paco")
-    end
+    subject { regexp(/\w{4}/) }
+
+    it { is_expected.to parse("Paco").fully }
+    it { is_expected.not_to parse("Alf") }
 
     it "returns matched parts of the string" do
       parser = seq(regexp(/pa/i), regexp(/\w+/))
-      expect(parser.parse("Paco")).to eq(%w[Pa co])
-    end
-
-    it "raises an error" do
-      expect { regexp(/\w{4}/).parse("Alf") }.to raise_error(Paco::ParseError)
+      expect(parser).to parse("Paco").as(%w[Pa co])
     end
 
     context "with groups in regex" do
       it "returns matched part of the string" do
-        expect(regexp(/(\w)\w*/).parse("Paco")).to eq("Paco")
+        expect(regexp(/(\w)\w*/)).to parse("Paco").as("Paco")
       end
 
       it "returns specified group" do
-        expect(regexp(/(\w{4}).*/, group: 1).parse("Paco!!!!111")).to eq("Paco")
+        expect(regexp(/(\w{4}).*/, group: 1)).to parse("Paco!!!!111").as("Paco")
       end
     end
   end
 
   describe "#regexp_char" do
-    let(:example) { regexp_char(/\w/).skip(remainder) }
+    subject { regexp_char(/\w/).skip(remainder) }
 
-    it "returns matched char" do
-      expect(example.parse("Paco")).to eq("P")
-    end
-
-    it "raises an error" do
-      expect { example.parse("П") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.to parse("Paco").as("P") }
+    it { is_expected.not_to parse("П") }
   end
 
   describe "#cr" do
-    it "returns cr" do
-      expect(cr.parse("\r")).to eq("\r")
-    end
+    subject { cr }
 
-    it "raises an error" do
-      expect { cr.parse("\n") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.to parse("\r").fully }
+    it { is_expected.not_to parse("\n") }
   end
 
   describe "#lf" do
-    it "returns lf" do
-      expect(lf.parse("\n")).to eq("\n")
-    end
+    subject { lf }
 
-    it "raises an error" do
-      expect { lf.parse("\r") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.to parse("\n").fully }
+    it { is_expected.not_to parse("\r") }
   end
 
   describe "#crlf" do
-    it "returns crlf" do
-      expect(crlf.parse("\r\n")).to eq("\r\n")
-    end
+    subject { crlf }
 
-    it "raises an error" do
-      expect { crlf.parse("\r") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.to parse("\r\n").fully }
+    it { is_expected.not_to parse("\r") }
   end
 
   describe "#newline" do
     subject { newline }
 
-    it "returns parsed chars", :aggregate_failures do
-      expect(subject.parse("\n")).to eq("\n")
-      expect(subject.parse("\r")).to eq("\r")
-      expect(subject.parse("\r\n")).to eq("\r\n")
-    end
-
-    it "raises an error" do
-      expect { subject.parse("") }.to raise_error(Paco::ParseError)
-      expect { subject.parse("paco") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.to parse("\n").fully }
+    it { is_expected.to parse("\r").fully }
+    it { is_expected.to parse("\r\n").fully }
+    it { is_expected.not_to parse("") }
+    it { is_expected.not_to parse("paco") }
   end
 
   describe "#end_of_line" do
     subject { end_of_line }
 
-    it "returns parsed chars", :aggregate_failures do
-      expect(subject.parse("\n")).to eq("\n")
-      expect(subject.parse("\r")).to eq("\r")
-      expect(subject.parse("\r\n")).to eq("\r\n")
-      expect(subject.parse("")).to be_nil
-    end
-
-    it "raises an error" do
-      expect { subject.parse("paco") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.to parse("\n").fully }
+    it { is_expected.to parse("\r").fully }
+    it { is_expected.to parse("\r\n").fully }
+    it { is_expected.to parse("").as(nil) }
+    it { is_expected.not_to parse("paco") }
   end
 
   describe "#any_char" do
-    it "returns parsed char" do
-      expect(any_char.parse("П")).to eq("П")
-    end
+    subject { any_char }
 
-    it "raises an error" do
-      expect { any_char.parse("") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.to parse("П").fully }
+    it { is_expected.not_to parse("") }
   end
 
   describe "#remainder" do
-    it "returns parsed char" do
-      expect(remainder.parse("Paco <3")).to eq("Paco <3")
-    end
+    subject { remainder }
 
-    it "returns empty string when eof" do
-      expect(remainder.parse("")).to eq("")
-    end
+    it { is_expected.to parse("Paco <3").fully }
+    it { is_expected.to parse("").fully }
   end
 
   describe "#eof" do
-    it "returns parsed char" do
-      expect(eof.parse("")).to be_nil
-    end
+    subject { eof }
 
-    it "raises an error" do
-      expect { eof.parse("Paco") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.to parse("").as(nil) }
+    it { is_expected.not_to parse("Paco") }
   end
 
   describe "#letter" do
-    it "returns parsed char" do
-      expect(letter.parse("Z")).to eq("Z")
-    end
+    subject { letter }
 
-    it "raises an error" do
-      expect { letter.parse("1") }.to raise_error(Paco::ParseError)
-    end
-
-    it "raises an error for non a-z letters" do
-      expect { letter.parse("П") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.to parse("Z").fully }
+    it { is_expected.not_to parse("1") }
+    it { is_expected.not_to parse("П") }
   end
 
   describe "#letters" do
-    it "returns parsed char" do
-      expect(letters.parse("Paco")).to eq("Paco")
-    end
+    subject { letters }
 
-    it "raises an error for non a-z letters" do
-      expect { letter.parse("Пако") }.to raise_error(Paco::ParseError)
-    end
-
-    it "raises an error" do
-      expect { letters.parse("42") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.to parse("Paco").fully }
+    it { is_expected.not_to parse("Пако") }
+    it { is_expected.not_to parse("42") }
   end
 
   describe "#opt_letters" do
-    it "returns parsed chars" do
-      expect(opt_letters.parse("Paco")).to eq("Paco")
-    end
+    subject { opt_letters }
+
+    it { is_expected.to parse("Paco").fully }
+    it { is_expected.to parse("").fully }
 
     it "returns empty string" do
-      expect(opt_letters.skip(remainder).parse("Пако")).to eq("")
+      expect(subject.skip(remainder)).to parse("Пако").as("")
     end
   end
 
   describe "#digit" do
+    subject { digit }
+
     it "returns parsed char" do
-      expect(digit.skip(remainder).parse("42!")).to eq("4")
+      expect(subject.skip(remainder)).to parse("42").as("4")
     end
 
-    it "raises an error" do
-      expect { digit.parse("a") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.not_to parse("a") }
   end
 
   describe "#digits" do
+    subject { digits }
+
     it "returns parsed chars" do
-      expect(digits.skip(remainder).parse("42!")).to eq("42")
+      expect(subject.skip(remainder)).to parse("42").as("42")
     end
 
-    it "raises an error" do
-      expect { digits.parse("Paco") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.not_to parse("Paco") }
   end
 
   describe "#opt_digits" do
+    subject { opt_digits }
+
     it "returns parsed chars" do
-      expect(opt_digits.skip(remainder).parse("42!")).to eq("42")
+      expect(subject.skip(remainder)).to parse("42!").as("42")
     end
 
     it "returns empty string" do
-      expect(opt_digits.skip(remainder).parse("Paco")).to eq("")
+      expect(subject.skip(remainder)).to parse("Paco").as("")
     end
+
+    it { is_expected.to parse("").fully }
   end
 
   describe "#ws" do
+    subject { ws }
+
     it "returns parsed chars" do
-      expect(ws.skip(remainder).parse("   Paco")).to eq("   ")
+      expect(subject.skip(remainder)).to parse("   Paco").as("   ")
     end
 
-    it "raises an error" do
-      expect { ws.parse("Paco") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.not_to parse("Paco") }
   end
 
   describe "#opt_ws" do
+    subject { opt_ws }
+
     it "returns parsed chars" do
-      expect(opt_ws.skip(remainder).parse("   Paco")).to eq("   ")
+      expect(subject.skip(remainder)).to parse("   Paco").as("   ")
     end
 
     it "returns empty string" do
-      expect(opt_ws.skip(remainder).parse("Paco")).to eq("")
+      expect(subject.skip(remainder)).to parse("Paco").as("")
     end
   end
 
   describe "#spaced" do
-    let(:example) { spaced(letters).skip(remainder) }
+    subject { spaced(letters).skip(remainder) }
 
-    it "returns parser results" do
-      expect(example.parse("   Hello    Paco!")).to eq("Hello")
-    end
+    it { is_expected.to parse("   Hello    Paco!").as("Hello") }
+    it { is_expected.to parse("Paco").fully }
 
-    it "returns parser results when no spaces" do
-      expect(example.parse("Paco")).to eq("Paco")
-    end
-
-    it "raises an error" do
-      expect { example.parse("!") }.to raise_error(Paco::ParseError)
-    end
+    it { is_expected.not_to parse("!") }
   end
 end

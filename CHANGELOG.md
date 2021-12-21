@@ -30,6 +30,18 @@ Call `Paco::Combinators.index` to get `Paco::Index` representing the current off
 index.parse("Paco") #=> #<struct Paco::Index pos=0, line=1, column=1> 
 ```
 
+- RSpec matcher `#parse`. ([@skryukov])
+
+Add `require "paco/rspec"` to `spec_helper.rb` to enable a special RSpec matcher `#parse`:
+
+```ruby
+subject { string("Paco") }
+
+it { is_expected.to parse("Paco") } # just checks if parser succeeds
+it { is_expected.to parse("Paco").as("Paco") } # checks if parser result is eq to value passed to `#as`
+it { is_expected.to parse("Paco").fully } # checks if parser result is the same as value passed to `#parse`
+```
+
 
 ### Changed
 

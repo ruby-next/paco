@@ -7,6 +7,7 @@
 - [Paco::Combinators: Text related methods](#pacocombinators-text-related-methods)
 - [Paco::Parser methods](#pacoparser-methods)
 - [Debugging](#debugging)
+- [Test helpers](#test-helpers)
 
 ## Usage
 
@@ -830,4 +831,17 @@ end
 #   {:pos=>4, :status=>:start, :depth=>3, :parser=>"end of file"},
 #   {:pos=>4, :status=>:failure, :depth=>2, :parser=>"end of file"}
 # ]
+```
+
+## Test helpers
+
+Paco provides a special RSpec helper, add `require "paco/rspec"` to `spec_helper.rb` to enable `#parse` matcher:
+
+```ruby
+subject { string("Paco") }
+
+it { is_expected.to parse("Paco") } # just checks if parser succeeds
+it { is_expected.to parse("Paco").as("Paco") } # checks if parser result is eq to value passed to `#as`
+it { is_expected.to parse("Paco").fully } # checks if parser result is the same as value passed to `#parse`
+it { is_expected.not_to parse("paco") } # checks if parser failed
 ```
