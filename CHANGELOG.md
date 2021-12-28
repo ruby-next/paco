@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog],
 and this project adheres to [Semantic Versioning].
 
-## [Unreleased]
+## [0.2.0] - 2021-12-28
 
 ### Added
 
@@ -42,7 +42,6 @@ it { is_expected.to parse("Paco").as("Paco") } # checks if parser result is eq t
 it { is_expected.to parse("Paco").fully } # checks if parser result is the same as value passed to `#parse`
 ```
 
-
 ### Changed
 
 - `Paco::Combinators.seq_map` merged into `Paco::Combinators.seq`. ([@skryukov])
@@ -54,7 +53,7 @@ it { is_expected.to parse("Paco").fully } # checks if parser result is the same 
 - `include Paco` now works inside `irb`. ([@skryukov])
 - `Paco::Combinators#not_followed_by` and `Paco::Combinators#seq` now don't consume input on error. ([@skryukov])
 
-## [0.1.0]
+## [0.1.0] - 2021-12-12
 
 ### Added
 
@@ -62,7 +61,8 @@ it { is_expected.to parse("Paco").fully } # checks if parser result is the same 
 
 [@skryukov]: https://github.com/skryukov
 
-[Unreleased]: https://github.com/skryukov/paco/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/skryukov/paco/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/skryukov/paco/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/skryukov/paco/commits/v0.1.0
 
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
