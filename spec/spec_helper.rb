@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 
-require "simplecov"
+if ENV["EOL"] != "true"
+  require "simplecov"
 
-SimpleCov.start do
-  add_filter "/spec/"
-  enable_coverage :branch
+  SimpleCov.start do
+    add_filter "/spec/"
+    enable_coverage :branch
+  end
 end
+
+require "backports/2.5" if ENV["EOL"] == "true"
 
 require "paco"
 require "paco/rspec"

@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require "ruby-next/language/setup"
+RubyNext::Language.setup_gem_load_path(transpile: true)
+
 require "paco/version"
 require "paco/parse_error"
 require "paco/context"
