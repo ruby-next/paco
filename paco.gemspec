@@ -26,5 +26,5 @@ Gem::Specification.new do |spec|
 
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "ruby-next-core", ">= 0.13.0"
+  spec.add_dependency "ruby-next-core", ">= 0.15.0"
 end
