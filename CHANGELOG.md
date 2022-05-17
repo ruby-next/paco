@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog],
 and this project adheres to [Semantic Versioning].
 
+## [Unreleased]
+
+## [0.2.1] - 2022-05-17
+
+### Added
+
+- Support Ruby 2.2+. ([@palkan])
+
 ## [0.2.0] - 2021-12-28
 
 ### Added
@@ -60,8 +68,10 @@ it { is_expected.to parse("Paco").fully } # checks if parser result is the same 
 - Initial implementation. ([@skryukov])
 
 [@skryukov]: https://github.com/skryukov
+[@palkan]: https://github.com/palkan
 
-[Unreleased]: https://github.com/skryukov/paco/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/skryukov/paco/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/skryukov/paco/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/skryukov/paco/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/skryukov/paco/commits/v0.1.0
 
