@@ -8,7 +8,7 @@ test: nextify
 	CI=true bundle exec rake
 
 lint:
-	bundle exec rubocop
+	bundle exec standardrb
 
 release: test lint
 	git status
