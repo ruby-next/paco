@@ -11,6 +11,8 @@ end
 
 require "backports/2.5" if ENV["EOL"] == "true"
 
+require "ruby-next/language/runtime" unless ENV["CI"]
+
 require "paco"
 require "paco/rspec"
 
