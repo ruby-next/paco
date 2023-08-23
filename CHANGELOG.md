@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning].
 
 ## [Unreleased]
 
+## [0.2.2] - 2023-08-23
+
+### Fixed
+
+- Ship gem with pre-transpiled files (`lib/.rbnext`). ([@palkan][])
+
 ## [0.2.1] - 2022-05-17
 
 ### Added
