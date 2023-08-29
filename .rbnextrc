@@ -1,3 +1,4 @@
 nextify: |
   ./lib
   --min-version=2.2
+  --single-version

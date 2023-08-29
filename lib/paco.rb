@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-require "ruby-next/language/setup"
-RubyNext::Language.setup_gem_load_path(transpile: true)
+if RUBY_VERSION < "2.6.0"
+  $LOAD_PATH.unshift File.expand_path("./.rbnext", __dir__)
+end
 
 require "paco/version"
 require "paco/parse_error"
