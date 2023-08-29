@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning].
 
 ## [Unreleased]
 
+## [0.2.3] - 2023-08-28
+
+- Remove `ruby-next-core` as a dependency. ([@palkan][])
+
 ## [0.2.2] - 2023-08-23
 
 ### Fixed
