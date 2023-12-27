@@ -4,7 +4,7 @@ module Paco
     # @param [Integer] pos
     def self.calculate(input:, pos:)
       raise ArgumentError, "`pos` must be a non-negative integer" if pos < 0
-      raise ArgumentError, "`pos` is grater then input length" if pos > input.length
+      raise ArgumentError, "`pos` is greater then input length" if pos > input.length
 
       lines = input[0..pos].lines
       line = lines.empty? ? 1 : lines.length

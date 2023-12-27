@@ -17,10 +17,16 @@ RSpec.describe Paco::Index do
   end
 
   it "raises an error when pos < 0" do
-    expect { index.calculate(input: input, pos: -1) }.to raise_error(ArgumentError)
+    expect { index.calculate(input: input, pos: -1) }.to raise_error(
+      ArgumentError,
+      "`pos` must be a non-negative integer"
+    )
   end
 
   it "raises an error when pos > input length" do
-    expect { index.calculate(input: input, pos: 1000) }.to raise_error(ArgumentError)
+    expect { index.calculate(input: input, pos: 1000) }.to raise_error(
+      ArgumentError,
+      "`pos` is greater then input length"
+    )
   end
 end
